@@ -1,0 +1,42 @@
+# backend/.gitignore
+
+# Dependencias de Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variables de entorno (¡IMPORTANTE!)
+.env
+.env.local
+.env.production
+
+# Base de datos SQLite
+*.db
+*.sqlite
+*.sqlite3
+nail_pro.db
+
+# Archivos subidos (imágenes temporales)
+uploads/
+temp/
+tmp/
+
+# Logs
+logs/
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build
+dist/
+build/
