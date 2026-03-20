@@ -18,21 +18,19 @@ const PORT = process.env.PORT || 4000;
 
 // ─── CORS CONFIGURADO PARA NETLIFY ───────────────────────────────────────────
 // Permite solicitudes desde Netlify y localhost en desarrollo
+// ─── CORS CONFIGURADO ───────────────────────────────────────────────────
+// ─── CORS CONFIGURADO ───────────────────────────────────────────────────
+// ─── CORS CONFIGURADO ───────────────────────────────────────────────────
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
-  'https://nail-pro-frontend.netlify.app',  // CAMBIA por tu URL de Netlify
-  'https://*.netlify.app',
-  '*'  // En producción, cambia esto por tu dominio específico
+  'https://nail-pro-frontend.vercel.app',  // sin barra final, sin doble https
 ];
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Permitir solicitudes sin origin (como móviles o curl)
     if (!origin) return callback(null, true);
-    
-    // Verificar si el origen está permitido
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.includes('netlify.app')) {
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       console.log('❌ Origen no permitido:', origin);
