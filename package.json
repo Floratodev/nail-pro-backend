@@ -13,8 +13,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@libsql/client": "^0.17.2",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.8.0",
     "cloudinary": "^2.9.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
