@@ -200,7 +200,48 @@ async function enviarEmail(destinatario, asunto, html) {
   }
 }
 
-// ─── JWT MIDDLEWARE ──────────────────────────────────────────────────────────
+async function notificarAdmin(cita, nombreSalon) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+  const html = `
+    <div style="font-family:'Georgia',serif;max-width:480px;margin:0 auto;background:#fff0f5;color:#3a1028;border-radius:16px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#c2567a,#e8729a);padding:24px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:6px;">💅</div>
+        <h1 style="color:#fff;font-size:18px;font-weight:400;margin:0;">Nueva reserva — ${nombreSalon}</h1>
+      </div>
+      <div style="padding:24px;">
+        <div style="background:rgba(194,86,122,0.08);border:1px solid rgba(194,86,122,0.2);border-radius:12px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(194,86,122,0.1);">
+            <span style="color:#9a6070;font-size:12px;">CLIENTA</span>
+            <span style="font-weight:600;">${cita.client_name}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(194,86,122,0.1);">
+            <span style="color:#9a6070;font-size:12px;">TELÉFONO</span>
+            <span>${cita.phone}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(194,86,122,0.1);">
+            <span style="color:#9a6070;font-size:12px;">SERVICIO</span>
+            <span>${cita.service_emoji} ${cita.service_name}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(194,86,122,0.1);">
+            <span style="color:#9a6070;font-size:12px;">FECHA</span>
+            <span>${cita.date}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(194,86,122,0.1);">
+            <span style="color:#9a6070;font-size:12px;">HORA</span>
+            <span style="font-weight:600;font-size:18px;color:#c2567a;">${cita.time}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;">
+            <span style="color:#9a6070;font-size:12px;">PRECIO</span>
+            <span style="font-weight:600;color:#c2567a;">${cita.service_price}€</span>
+          </div>
+          ${cita.notes ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(194,86,122,0.1);font-size:13px;color:#9a6070;">📝 ${cita.notes}</div>` : ""}
+        </div>
+      </div>
+    </div>
+  `;
+  await enviarEmail(adminEmail, `💅 Nueva cita — ${cita.client_name} · ${cita.date} ${cita.time}`, html);
+}
 function verificarToken(req, res, next) {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(401).json({ error: "Token de acceso requerido" });
@@ -402,6 +443,9 @@ app.post("/api/appointments", async (req, res) => {
     const cita       = fila(await db.execute({ sql: "SELECT * FROM appointments WHERE id=?", args: [id] }));
     const configNombre = fila(await db.execute("SELECT value FROM salon_config WHERE key='name'"));
     const nombreSalon  = configNombre?.value;
+
+    // Notificar a la admin
+    await notificarAdmin(cita, nombreSalon);
 
     if (phone.includes("@")) {
       await enviarEmail(phone, `✅ Cita reservada — ${nombreSalon}`, plantillaEmail("reserva", cita, nombreSalon));
