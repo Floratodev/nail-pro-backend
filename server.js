@@ -6,7 +6,7 @@ require("dotenv").config();
 const express    = require("express");
 const cors       = require("cors");
 const jwt        = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const cloudinary = require("cloudinary").v2;
 const multer     = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -177,21 +177,21 @@ const uploadLocal       = multer({ dest: "./uploads/",                 limits: {
 
 if (!fs.existsSync("./uploads")) fs.mkdirSync("./uploads");
 
-// ─── NODEMAILER ──────────────────────────────────────────────────────────────
-const transportadorEmail = nodemailer.createTransport({
-  service: "gmail",
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-});
+// ─── RESEND (EMAIL) ──────────────────────────────────────────────────────────
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function enviarEmail(destinatario, asunto, html) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log("📧 Email no configurado. Se enviaría a:", destinatario);
+  if (!process.env.RESEND_API_KEY) {
+    console.log("📧 Resend no configurado. Se enviaría a:", destinatario);
     return { omitido: true };
   }
   try {
-    await transportadorEmail.sendMail({
-      from: `"${process.env.SALON_NAME || "Nail Pro"}" <${process.env.EMAIL_USER}>`,
-      to: destinatario, subject: asunto, html,
+    await resend.emails.send({
+      from: `${process.env.SALON_NAME || "Nail Pro"} <onboarding@resend.dev>`,
+      to: destinatario,
+      subject: asunto,
+      html,
     });
     return { enviado: true };
   } catch (error) {
