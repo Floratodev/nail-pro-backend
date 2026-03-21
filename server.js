@@ -201,7 +201,11 @@ async function enviarEmail(destinatario, asunto, html) {
 
 async function notificarAdmin(cita, nombreSalon) {
   const adminEmail = process.env.ADMIN_EMAIL;
-  if (!adminEmail) return;
+  console.log("📧 notificarAdmin llamada. ADMIN_EMAIL:", adminEmail);
+  if (!adminEmail) {
+    console.log("📧 No hay ADMIN_EMAIL configurado, saltando notificación");
+    return;
+  }
   const html = `
     <div style="font-family:'Georgia',serif;max-width:480px;margin:0 auto;background:#fff0f5;color:#3a1028;border-radius:16px;overflow:hidden;">
       <div style="background:linear-gradient(135deg,#c2567a,#e8729a);padding:24px;text-align:center;">
