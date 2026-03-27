@@ -435,6 +435,47 @@ app.post("/api/appointments", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.put("/api/appointments/:id", verificarToken, async (req, res) => {
+  const { serviceIds, serviceName, servicePrice, serviceEmoji, totalDuration, servicesJson, date, time, notes } = req.body;
+  try {
+    // Recalcular desde los IDs si se pasan, o usar los valores ya calculados en el frontend
+    let finalName  = serviceName;
+    let finalPrice = servicePrice;
+    let finalEmoji = serviceEmoji;
+    let finalDur   = totalDuration;
+    let finalJson  = servicesJson;
+
+    if (serviceIds && serviceIds.length > 0) {
+      const svcs = [];
+      for (const id of serviceIds) {
+        const svc = fila(await db.execute({ sql: "SELECT * FROM services WHERE id=? AND active=1", args: [id] }));
+        if (svc) svcs.push(svc);
+      }
+      if (svcs.length > 0) {
+        finalName  = svcs.map(s => s.name).join(" + ");
+        finalPrice = svcs.reduce((sum, s) => sum + Number(s.price), 0);
+        finalEmoji = svcs.map(s => s.emoji).join("");
+        finalDur   = svcs.reduce((sum, s) => sum + Number(s.duration), 0);
+        finalJson  = JSON.stringify(svcs);
+      }
+    }
+
+    await db.execute({
+      sql: `UPDATE appointments SET
+        service_id=?, service_name=?, service_price=?, service_emoji=?,
+        total_duration=?, services_json=?, date=?, time=?, notes=?
+        WHERE id=?`,
+      args: [
+        serviceIds?.[0] || null,
+        finalName, finalPrice, finalEmoji, finalDur, finalJson,
+        date, time, notes || "", req.params.id
+      ],
+    });
+    const cita = fila(await db.execute({ sql: "SELECT * FROM appointments WHERE id=?", args: [req.params.id] }));
+    res.json(cita);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.patch("/api/appointments/:id/status", verificarToken, async (req, res) => {
   const { status } = req.body;
   const estadosValidos = ["pendiente", "confirmada", "completada", "cancelada"];
