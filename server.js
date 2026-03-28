@@ -31,53 +31,51 @@ const db = createClient({
 });
 
 async function inicializarDB() {
-  await db.executeMultiple(`
-    CREATE TABLE IF NOT EXISTS appointments (
-      id               TEXT PRIMARY KEY,
-      client_name      TEXT NOT NULL,
-      phone            TEXT NOT NULL,
-      services_json    TEXT DEFAULT '[]',
-      service_id       INTEGER,
-      service_name     TEXT,
-      service_price    REAL,
-      service_emoji    TEXT,
-      total_duration   INTEGER DEFAULT 0,
-      date             TEXT NOT NULL,
-      time             TEXT NOT NULL,
-      notes            TEXT DEFAULT '',
-      inspiration_url  TEXT DEFAULT '',
-      status           TEXT DEFAULT 'pendiente',
-      created_at       TEXT DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS services (
-      id       INTEGER PRIMARY KEY AUTOINCREMENT,
-      name     TEXT NOT NULL,
-      duration INTEGER NOT NULL,
-      price    REAL NOT NULL,
-      emoji    TEXT DEFAULT '💅',
-      accent   TEXT DEFAULT '#c9956c',
-      active   INTEGER DEFAULT 1
-    );
-    CREATE TABLE IF NOT EXISTS gallery (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      url        TEXT NOT NULL,
-      public_id  TEXT,
-      caption    TEXT DEFAULT '',
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-    CREATE TABLE IF NOT EXISTS salon_config (
-      key   TEXT PRIMARY KEY,
-      value TEXT
-    );
-    CREATE TABLE IF NOT EXISTS client_notes (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      phone       TEXT NOT NULL,
-      client_name TEXT NOT NULL,
-      note        TEXT NOT NULL,
-      created_at  TEXT DEFAULT (datetime('now')),
-      updated_at  TEXT DEFAULT (datetime('now'))
-    );
-  `);
+  await db.execute(`CREATE TABLE IF NOT EXISTS appointments (
+    id               TEXT PRIMARY KEY,
+    client_name      TEXT NOT NULL,
+    phone            TEXT NOT NULL,
+    services_json    TEXT DEFAULT '[]',
+    service_id       INTEGER,
+    service_name     TEXT,
+    service_price    REAL,
+    service_emoji    TEXT,
+    total_duration   INTEGER DEFAULT 0,
+    date             TEXT NOT NULL,
+    time             TEXT NOT NULL,
+    notes            TEXT DEFAULT '',
+    inspiration_url  TEXT DEFAULT '',
+    status           TEXT DEFAULT 'pendiente',
+    created_at       TEXT DEFAULT (datetime('now'))
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS services (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    name     TEXT NOT NULL,
+    duration INTEGER NOT NULL,
+    price    REAL NOT NULL,
+    emoji    TEXT DEFAULT '💅',
+    accent   TEXT DEFAULT '#c9956c',
+    active   INTEGER DEFAULT 1
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS gallery (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    url        TEXT NOT NULL,
+    public_id  TEXT,
+    caption    TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS salon_config (
+    key   TEXT PRIMARY KEY,
+    value TEXT
+  )`);
+  await db.execute(`CREATE TABLE IF NOT EXISTS client_notes (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    phone       TEXT NOT NULL,
+    client_name TEXT NOT NULL,
+    note        TEXT NOT NULL,
+    created_at  TEXT DEFAULT (datetime('now')),
+    updated_at  TEXT DEFAULT (datetime('now'))
+  )`);
 
   for (const sql of [
     "ALTER TABLE appointments ADD COLUMN services_json TEXT DEFAULT '[]'",
