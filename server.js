@@ -138,7 +138,7 @@ const transportadorEmail = nodemailer.createTransport({
 });
 
 async function enviarEmail(dest, asunto, html) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) { console.log("📧 Email no configurado"); return; }
+  return; // Email desactivado temporalmente
   try { await transportadorEmail.sendMail({ from: `"Nail Pro" <${process.env.EMAIL_USER}>`, to: dest, subject: asunto, html }); }
   catch (e) { console.error("❌ Email error:", e.message); }
 }
