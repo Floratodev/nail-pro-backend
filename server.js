@@ -213,6 +213,11 @@ app.get("/api/appointments/booked/:date", async (req, res) => {
     const { rows } = await db.execute({ sql: "SELECT time, total_duration FROM appointments WHERE date=? AND status!='cancelada'", args: [req.params.date] });
     const ocupados = new Set();
     rows.forEach(c => calcularSlotsOcupados(c.time, c.total_duration||60, TODOS_SLOTS).forEach(s => ocupados.add(s)));
+    // En agosto, bloquear todos los slots antes de las 11:30
+    const mes = new Date(req.params.date).getMonth(); // 7 = agosto
+    if (mes === 7) {
+      ["09:30","10:00","10:30","11:00"].forEach(s => ocupados.add(s));
+    }
     res.json([...ocupados]);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
